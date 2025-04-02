@@ -73,7 +73,7 @@ export default function Header() {
             </NavigationMenuItem>
             <NavigationMenuItem>
               <Link href="/about" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>About</NavigationMenuLink>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>About JSON Forge</NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
           </NavigationMenuList>

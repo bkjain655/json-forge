@@ -11,10 +11,10 @@ export default function Footer() {
         </div>
         <div className="flex gap-4 text-sm text-muted-foreground">
           <Link href="/about" className="hover:underline">
-            About
+            About JSON Forge
           </Link>
-          <Link href="/contact" className="hover:underline">
-            Contact
+          <Link href="/connect" className="hover:underline">
+            Connect with me
           </Link>
         </div>
         <p className="text-sm text-muted-foreground">

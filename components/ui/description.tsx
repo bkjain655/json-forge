@@ -69,11 +69,11 @@ export default function Description() {
           {CONTENT.map((item) => (
             <AccordionItem key={item.id} value={item.id}>
               <AccordionTrigger 
-                className="flex justify-between items-center w-full p-4 bg-gray-100 rounded-lg hover:bg-gray-200"
+                className="flex justify-between items-center w-full p-4"
                 onClick={() => handleChange(item.id)}
               >
                 <span className="font-semibold text-left">{item.title}</span>
-                {expanded === item.id ? <ChevronUp /> : <ChevronDown />}
+                {/* {expanded === item.id ? <ChevronUp /> : <ChevronDown />} */}
               </AccordionTrigger>
               <AccordionContent className="p-4 text-left block">
                 {item.description.map((paragraph, index) => (
