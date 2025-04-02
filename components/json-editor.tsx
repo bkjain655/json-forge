@@ -17,7 +17,7 @@ interface JsonEditorProps {
   readOnly?: boolean
 }
 
-export default function JsonEditor({
+export function JsonEditor({
   value,
   onChange,
   placeholder = "Paste your JSON here...",

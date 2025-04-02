@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import JsonEditor from "@/components/json-editor"
+import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { isValidJson, compareJson } from "@/lib/utils"

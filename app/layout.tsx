@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   description:
     "Free online JSON Forge for developers - compare, merge, validate, format, convert JSON to YAML, generate schemas and more.",
   keywords: KEYWORDS,
+  icons: "/favicon/favicon.ico",
   authors: [{ name: "JSON Forge" }],
   creator: "JSON Forge",
   openGraph: {

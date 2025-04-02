@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import JsonEditor from "@/components/json-editor"
+import { JsonEditor } from "@/components/json-editor"
 import { isValidJson, mergeJson } from "@/lib/utils"
 import { GitMerge, Plus, Trash } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"

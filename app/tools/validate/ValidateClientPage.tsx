@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import JsonEditor from "@/components/json-editor"
+import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
 import { formatJson } from "@/lib/utils"
 import { FileCheck, CheckCircle, XCircle } from "lucide-react"

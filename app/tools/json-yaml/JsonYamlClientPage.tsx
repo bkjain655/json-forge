@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import JsonEditor from "@/components/json-editor"
+import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { isValidJson } from "@/lib/utils"
@@ -167,7 +167,7 @@ export default function JsonYamlClientPage() {
         let array = getNestedValue(jsonObj, arrayPath)[arrayKey]
         if (!Array.isArray(array)) {
           array = []
-          setNestedValue(jsonObj, arrayPath, arrayKey, array)
+          setNestedValue(jsonObj, arrayPath, arrayKey)
         }
 
         array.push(parseYamlValue(value))
