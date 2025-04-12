@@ -50,6 +50,12 @@ export default function Home() {
       description: "Convert between JSON and XML formats",
       icon: <RotateCw className="h-8 w-8 mb-2" />,
       href: "/tools/json-xml",
+    }, 
+    {
+      title: "JSON to CSV",
+      description: "Convert between JSON and CSV formats",
+      icon: <RotateCw className="h-8 w-8 mb-2" />,
+      href: "/tools/json-csv",
     },    
     {
       title: "JSON Schema Generator",

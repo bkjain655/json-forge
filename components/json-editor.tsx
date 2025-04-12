@@ -15,6 +15,7 @@ interface JsonEditorProps {
   height?: string
   className?: string
   readOnly?: boolean
+  fileType?: string
 }
 
 export function JsonEditor({
@@ -26,6 +27,7 @@ export function JsonEditor({
   height = "h-[400px]",
   className,
   readOnly = false,
+  fileType = "json",
 }: JsonEditorProps) {
   const [copied, setCopied] = useState(false)
 
@@ -68,7 +70,7 @@ export function JsonEditor({
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "data.json"
+    a.download = `data.${fileType}`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)

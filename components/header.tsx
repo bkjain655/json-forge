@@ -28,6 +28,7 @@ export default function Header() {
     { name: "JSON Formatter", href: "/tools/formatter" },
     { name: "JSON to YAML", href: "/tools/json-yaml" },
     { name: "JSON to XML", href: "/tools/json-xml" },
+    { name: "JSON to CSV", href: "/tools/json-csv" },
     { name: "JSON Schema Generator", href: "/tools/schema-generator" },
   ]
 

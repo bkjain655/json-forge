@@ -158,7 +158,7 @@ export default function JsonXmlClientPage() {
             <Button onClick={handleJsonToXml}>Convert to XML</Button>
           </div>
 
-          {xml && <JsonEditor value={xml} onChange={() => {}} label="XML Output" readOnly />}
+          {xml && <JsonEditor fileType={'xml'} value={xml} onChange={() => {}} label="XML Output" readOnly />}
 
           <div className="flex justify-center">
             <Button variant="outline" onClick={loadJsonSample}>
