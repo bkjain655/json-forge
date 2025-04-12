@@ -63,6 +63,8 @@ export default function RootLayout({
                 gtag('config', '${GA_TRACKING_ID}', { page_path: window.location.pathname });`
             }
         </Script>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1302626070893007"
+          crossOrigin="anonymous"></script>
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
