@@ -34,7 +34,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-evenly">
+      <div className="container flex h-16 items-center justify-around">
         <div className="flex items-center gap-2 ml-4">
           <Link href="/" className="flex items-center space-x-2">
             <FileJson className="h-6 w-6" />
@@ -80,6 +80,10 @@ export default function Header() {
           </NavigationMenuList>
         </NavigationMenu>
 
+        <div className="flex items-center gap-2">
+          <ModeToggle />
+        </div>
+
         {/* Mobile Navigation */}
         <Sheet>
           <SheetTrigger asChild className="md:hidden">
@@ -116,10 +120,6 @@ export default function Header() {
             </div>
           </SheetContent>
         </Sheet>
-
-        <div className="flex items-center gap-2">
-          <ModeToggle />
-        </div>
       </div>
     </header>
   )
