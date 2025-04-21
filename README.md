@@ -13,7 +13,7 @@
 - **JSON Schema Generator** – Generate JSON schemas effortlessly.
 
 ## 🌐 Live Demo
-Try it out now: **[JSON Forge](https://jsonforge.dev)**
+Try it out now: **[JSON Forge](https://jsonforge.com)**
 
 ## 📌 How It Works
 

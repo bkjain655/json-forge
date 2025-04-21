@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://jsonforge.dev",
+    url: "https://jsonforge.com",
     title: "JSON Forge - Developer Utilities for JSON Operations",
     description:
       "Free online JSON Forge for developers - compare, merge, validate, format, convert JSON to YAML, generate schemas and more.",
