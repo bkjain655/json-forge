@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { FileJson } from "lucide-react"
+import { FileJson, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 import {
@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/navigation-menu"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu } from "lucide-react"
 
 export default function Header() {
   const pathname = usePathname()
@@ -32,11 +31,20 @@ export default function Header() {
     { name: "JSON Schema Generator", href: "/tools/schema-generator" },
   ]
 
+  const pages = [
+    { name: "About Us", href: "/about" },
+    { name: "Contact Us", href: "/contact-us" },
+    { name: "Privacy Policy", href: "/privacy-policy" },
+    { name: "Terms & Conditions", href: "/terms-and-conditions" },
+  ]
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-around">
+      <div className="container flex h-16 items-center justify-between">
+        
+        {/* Logo */}
         <div className="flex items-center gap-2 ml-4">
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" aria-label="JSON Forge Home" className="flex items-center space-x-2">
             <FileJson className="h-6 w-6" />
             <span className="font-bold text-xl hidden sm:inline-block">JSON Forge</span>
           </Link>
@@ -47,9 +55,12 @@ export default function Header() {
           <NavigationMenuList>
             <NavigationMenuItem>
               <Link href="/" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>Home</NavigationMenuLink>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Home
+                </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
+
             <NavigationMenuItem>
               <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
               <NavigationMenuContent>
@@ -72,14 +83,20 @@ export default function Header() {
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/about" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>About JSON Forge</NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
+
+            {pages.map((page) => (
+              <NavigationMenuItem key={page.name}>
+                <Link href={page.href} legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    {page.name}
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+            ))}
           </NavigationMenuList>
         </NavigationMenu>
 
+        {/* Theme Toggle */}
         <div className="flex items-center gap-2">
           <ModeToggle />
         </div>
@@ -93,10 +110,11 @@ export default function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left">
-            <div className="flex flex-col gap-4 mt-8">
-              <Link href="/" className="text-lg font-semibold">
+            <div className="flex flex-col gap-6 mt-8">
+              <Link href="/" className="text-lg font-semibold" aria-label="Home">
                 Home
               </Link>
+
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold">Tools</h3>
                 <div className="flex flex-col space-y-2 pl-2">
@@ -114,9 +132,21 @@ export default function Header() {
                   ))}
                 </div>
               </div>
-              <Link href="/about" className="text-lg font-semibold">
-                About
-              </Link>
+
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold">Pages</h3>
+                <div className="flex flex-col space-y-2 pl-2">
+                  {pages.map((page) => (
+                    <Link
+                      key={page.name}
+                      href={page.href}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      {page.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
           </SheetContent>
         </Sheet>
@@ -124,4 +154,3 @@ export default function Header() {
     </header>
   )
 }
-

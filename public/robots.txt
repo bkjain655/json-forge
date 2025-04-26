@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://jsonforge.com
+
+# Sitemaps
+Sitemap: https://jsonforge.com/sitemap.xml

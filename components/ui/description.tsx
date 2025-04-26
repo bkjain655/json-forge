@@ -63,9 +63,9 @@ export default function Description() {
   return (
     <div className="flex items-center justify-center min-h-screen p-6">
       <div className="max-w-3xl w-full">
-        <h2 className="text-3xl font-bold text-center mb-6">JSON Forge – Online JSON & YAML Utility Suite</h2>
+        <h2 className="text-3xl font-bold text-center mb-6">About JSON Forge – Best Online JSON & YAML Tools for Developers</h2>
         
-        <Accordion type="multiple" defaultValue={CONTENT.map(v => v.id)}>
+        <Accordion type="single" defaultValue={CONTENT[0].id} collapsible className="w-full">
           {CONTENT.map((item) => (
             <AccordionItem key={item.id} value={item.id}>
               <AccordionTrigger 
@@ -73,7 +73,7 @@ export default function Description() {
                 onClick={() => handleChange(item.id)}
               >
                 <span className="font-semibold text-left">{item.title}</span>
-                {/* {expanded === item.id ? <ChevronUp /> : <ChevronDown />} */}
+                {expanded === item.id ? <ChevronUp /> : <ChevronDown />}
               </AccordionTrigger>
               <AccordionContent className="p-4 text-left block">
                 {item.description.map((paragraph, index) => (
