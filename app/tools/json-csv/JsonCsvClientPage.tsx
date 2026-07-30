@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RotateCw } from "lucide-react";
 import { Input } from "@/components/ui/input"
+import { MAX_INPUT_SIZE_LABEL, isOverSizeLimit } from "@/lib/utils"
 
 export default function JsonCsvClientPage() {
   const [json, setJson] = useState("")
@@ -13,40 +14,133 @@ export default function JsonCsvClientPage() {
   const [activeTab, setActiveTab] = useState("json-to-csv")
   const [error, setError] = useState("")
 
+  // Clear stale errors as soon as the user provides new input.
+  const handleJsonChange = (value: string) => {
+    setError("")
+    setJson(value)
+  }
+
+  const handleCsvChange = (value: string) => {
+    setError("")
+    setCsv(value)
+  }
+
+  /** RFC 4180: wrap in quotes when the value contains a comma, quote or newline. */
+  function escapeCsvValue(value: unknown): string {
+    if (value === null || value === undefined) return ""
+    const raw = typeof value === "object" ? JSON.stringify(value) : String(value)
+    return /[",\r\n]/.test(raw) ? `"${raw.replace(/"/g, '""')}"` : raw
+  }
+
+  /** RFC 4180 parser: understands quoted fields, escaped quotes and embedded newlines. */
+  function parseCsv(input: string): string[][] {
+    const rows: string[][] = []
+    let row: string[] = []
+    let field = ""
+    let inQuotes = false
+
+    for (let i = 0; i < input.length; i++) {
+      const char = input[i]
+
+      if (inQuotes) {
+        if (char === '"') {
+          if (input[i + 1] === '"') {
+            field += '"'
+            i++
+          } else {
+            inQuotes = false
+          }
+        } else {
+          field += char
+        }
+        continue
+      }
+
+      if (char === '"') {
+        inQuotes = true
+      } else if (char === ",") {
+        row.push(field)
+        field = ""
+      } else if (char === "\n" || char === "\r") {
+        // Swallow the \n of a \r\n pair.
+        if (char === "\r" && input[i + 1] === "\n") i++
+        row.push(field)
+        rows.push(row)
+        row = []
+        field = ""
+      } else {
+        field += char
+      }
+    }
+
+    if (inQuotes) throw new Error("Unterminated quoted field in CSV")
+    if (field !== "" || row.length > 0) {
+      row.push(field)
+      rows.push(row)
+    }
+
+    return rows.filter((r) => r.some((cell) => cell !== ""))
+  }
+
   function jsonToCSV() {
+    setError("")
+    setCsv("")
+
+    if (!json.trim()) {
+      setError("Please enter JSON to convert")
+      return
+    }
+
     try {
-      const objArray = JSON.parse(json);
-      if (!Array.isArray(objArray)) throw new Error("JSON must be an array of objects");
-  
-      const headers = Object.keys(objArray[0]);
+      const objArray = JSON.parse(json)
+      if (!Array.isArray(objArray)) throw new Error("JSON must be an array of objects")
+      if (objArray.length === 0) throw new Error("JSON array is empty - nothing to convert")
+
+      // Union of keys across every row, so rows with extra fields are not dropped.
+      const headers: string[] = []
+      for (const row of objArray) {
+        if (row === null || typeof row !== "object" || Array.isArray(row)) {
+          throw new Error("Every item in the JSON array must be an object")
+        }
+        for (const key of Object.keys(row)) {
+          if (!headers.includes(key)) headers.push(key)
+        }
+      }
+
       const csvRows = [
-        headers.join(","),
-        ...objArray.map(row =>
-          headers.map(field => JSON.stringify(row[field] ?? "")).join(",")
-        ),
-      ];
-      setCsv(csvRows.join("\n"));
-    } catch (error: any) {
-      setError(`Error: ${error.message}`);
+        headers.map(escapeCsvValue).join(","),
+        ...objArray.map((row) => headers.map((field) => escapeCsvValue(row[field])).join(",")),
+      ]
+      setCsv(csvRows.join("\n"))
+    } catch (err) {
+      setError(`Error: ${err instanceof Error ? err.message : "Could not convert JSON to CSV"}`)
     }
   }
-  
+
   function csvToJSON() {
+    setError("")
+    setJson("")
+
+    if (!csv.trim()) {
+      setError("Please provide CSV to convert")
+      return
+    }
+
     try {
-      const [headerLine, ...lines] = csv.trim().split("\n");
-      const headers = headerLine.split(",");
-  
-      const json = lines.map(line => {
-        const values = line.split(",");
-        return headers.reduce((acc, header, i) => {
-          acc[header] = values[i]?.replace(/^"|"$/g, "");
-          return acc;
-        }, {} as Record<string, string>);
-      });
-  
-      setJson(JSON.stringify(json, null, 2));
-    } catch (error: any) {
-      setError(`Error: ${error.message}`);
+      const rows = parseCsv(csv)
+      if (rows.length === 0) throw new Error("CSV is empty")
+
+      const [headers, ...dataRows] = rows
+      const parsed = dataRows.map((values) =>
+        headers.reduce((acc, header, i) => {
+          acc[header] = values[i] ?? ""
+          return acc
+        }, {} as Record<string, string>),
+      )
+
+      setJson(JSON.stringify(parsed, null, 2))
+    } catch (err) {
+      setError(`Error: ${err instanceof Error ? err.message : "Could not convert CSV to JSON"}`)
     }
   }
 
@@ -71,19 +165,21 @@ export default function JsonCsvClientPage() {
     setActiveTab("json-to-csv")
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "csv" | "xml") => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-  
+
+    setError("");
+
+    if (isOverSizeLimit(file.size)) {
+      setError(`File is too large. The maximum supported size is ${MAX_INPUT_SIZE_LABEL}.`);
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
-      try {
-        const content = reader.result as string;
-        setCsv(content);
-        setJson("");
-      } catch (err: any) {
-        setCsv("");
-      }
+      setCsv(reader.result as string);
+      setJson("");
     };
     reader.onerror = () => {
       setError("Error reading the file.");
@@ -109,7 +205,7 @@ export default function JsonCsvClientPage() {
         <TabsContent value="json-to-csv" className="space-y-6">
           <JsonEditor
             value={json}
-            onChange={setJson}
+            onChange={handleJsonChange}
             label="JSON Input"
             error={activeTab === "json-to-csv" ? error : ""}
           />
@@ -129,11 +225,18 @@ export default function JsonCsvClientPage() {
 
         <TabsContent value="csv-to-json" className="space-y-6">
           <div className="flex flex-col gap-2">
-            <label className="font-medium text-gray-700">Upload CSV File</label>
-            <Input type="file" accept=".csv" onChange={(e) => {
-              handleFileUpload(e, "csv")
-            }} />
+            <label htmlFor="csv-file" className="font-medium">Upload CSV File</label>
+            <Input id="csv-file" type="file" accept=".csv" onChange={handleFileUpload} />
           </div>
+
+          <JsonEditor
+            fileType={'csv'}
+            value={csv}
+            onChange={handleCsvChange}
+            label="CSV Input"
+            placeholder="Paste your CSV here..."
+            error={activeTab === "csv-to-json" ? error : ""}
+          />
 
           <div className="flex justify-center">
             <Button onClick={csvToJSON}>Convert to JSON</Button>

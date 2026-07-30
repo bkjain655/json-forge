@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
-import { isValidJson } from "@/lib/utils"
+import { tryParseJson } from "@/lib/utils"
 import { Code } from "lucide-react"
 
 export default function JsonSchemaGeneratorClientPage() {
@@ -20,14 +20,14 @@ export default function JsonSchemaGeneratorClientPage() {
       return
     }
 
-    if (!isValidJson(json)) {
-      setError("Invalid JSON format")
+    const parsed = tryParseJson(json)
+    if (!parsed.ok) {
+      setError(parsed.error)
       return
     }
 
     try {
-      const parsed = JSON.parse(json)
-      const generatedSchema = generateJsonSchema(parsed)
+      const generatedSchema = generateJsonSchema(parsed.value)
       setSchema(JSON.stringify(generatedSchema, null, 2))
     } catch (err) {
       setError("Error generating schema")

@@ -5,103 +5,131 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function isValidJson(json: string): boolean {
-  if (!json.trim()) return false
+/**
+ * Shared input cap. Every tool parses on the main thread, so anything larger
+ * than this locks up the tab rather than producing a useful result.
+ */
+export const MAX_INPUT_BYTES = 5 * 1024 * 1024
+export const MAX_INPUT_SIZE_LABEL = "5 MB"
+
+export function isOverSizeLimit(input: string | number): boolean {
+  const bytes = typeof input === "number" ? input : new Blob([input]).size
+  return bytes > MAX_INPUT_BYTES
+}
+
+/**
+ * Parse once and return the result alongside the error, so callers never have
+ * to validate and then parse the same string a second time.
+ */
+export function tryParseJson(json: string): { ok: true; value: any } | { ok: false; error: string } {
+  if (!json.trim()) return { ok: false, error: "Please enter JSON" }
 
   try {
-    JSON.parse(json)
-    return true
+    return { ok: true, value: JSON.parse(json) }
   } catch (e) {
-    return false
+    return { ok: false, error: e instanceof Error ? `Invalid JSON: ${e.message}` : "Invalid JSON format" }
   }
 }
 
-export function formatJson(json: string, spaces = 2): string {
-  if (!json.trim()) return ""
-
-  try {
-    const parsed = JSON.parse(json)
-    return JSON.stringify(parsed, null, spaces)
-  } catch (e) {
-    return json
-  }
+export interface JsonDiff {
+  added: Record<string, any>
+  removed: Record<string, any>
+  modified: Record<string, { from: any; to: any }>
 }
 
-export function minifyJson(json: string): string {
-  if (!json.trim()) return ""
+export function compareJson(json1: string, json2: string): JsonDiff {
+  let obj1: any
+  let obj2: any
 
   try {
-    const parsed = JSON.parse(json)
-    return JSON.stringify(parsed)
-  } catch (e) {
-    return json
-  }
-}
-
-export function compareJson(json1: string, json2: string): { added: any; removed: any; modified: any } {
-  try {
-    const obj1 = JSON.parse(json1)
-    const obj2 = JSON.parse(json2)
-
-    return {
-      added: findAdded(obj1, obj2),
-      removed: findAdded(obj2, obj1), // Reversed to find removed
-      modified: findModified(obj1, obj2),
-    }
+    obj1 = JSON.parse(json1)
+    obj2 = JSON.parse(json2)
   } catch (e) {
     throw new Error("Invalid JSON provided for comparison")
   }
+
+  const diff: JsonDiff = { added: {}, removed: {}, modified: {} }
+  diffValues(obj1, obj2, "", diff)
+  return diff
 }
 
-function findAdded(obj1: any, obj2: any, path = ""): any {
-  const result: any = {}
+function isPlainObject(value: any): boolean {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
 
-  if (typeof obj1 !== "object" || typeof obj2 !== "object" || obj1 === null || obj2 === null) {
-    return {}
+/** Order-independent, key-order-independent serialization used for equality checks. */
+function canonicalize(value: any): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null"
+  if (Array.isArray(value)) return `[${value.map(canonicalize).join(",")}]`
+  return `{${Object.keys(value)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${canonicalize(value[key])}`)
+    .join(",")}}`
+}
+
+function deepEqual(a: any, b: any): boolean {
+  return canonicalize(a) === canonicalize(b)
+}
+
+/**
+ * Compare two arrays as multisets so that reordering the same elements is not
+ * reported as a change - only genuinely added or removed elements surface.
+ */
+function diffArrays(left: any[], right: any[]): { added: any[]; removed: any[] } {
+  const remaining = new Map<string, number>()
+  for (const item of left) {
+    const key = canonicalize(item)
+    remaining.set(key, (remaining.get(key) ?? 0) + 1)
   }
 
-  for (const key in obj1) {
-    const currentPath = path ? `${path}.${key}` : key
+  const added: any[] = []
+  for (const item of right) {
+    const key = canonicalize(item)
+    const count = remaining.get(key) ?? 0
+    if (count > 0) remaining.set(key, count - 1)
+    else added.push(item)
+  }
 
-    if (!(key in obj2)) {
-      result[currentPath] = obj1[key]
-    } else if (
-      typeof obj1[key] === "object" &&
-      obj1[key] !== null &&
-      typeof obj2[key] === "object" &&
-      obj2[key] !== null
-    ) {
-      const nestedAdded = findAdded(obj1[key], obj2[key], currentPath)
-      Object.assign(result, nestedAdded)
+  const removed: any[] = []
+  for (const item of left) {
+    const key = canonicalize(item)
+    const count = remaining.get(key) ?? 0
+    if (count > 0) {
+      removed.push(item)
+      remaining.set(key, count - 1)
     }
   }
 
-  return result
+  return { added, removed }
 }
 
-function findModified(obj1: any, obj2: any, path = ""): any {
-  const result: any = {}
+function diffValues(left: any, right: any, path: string, diff: JsonDiff): void {
+  const child = (key: string) => (path ? `${path}.${key}` : key)
 
-  if (typeof obj1 !== "object" || typeof obj2 !== "object" || obj1 === null || obj2 === null) {
-    return {}
-  }
-
-  for (const key in obj1) {
-    const currentPath = path ? `${path}.${key}` : key
-
-    if (key in obj2) {
-      if (typeof obj1[key] !== "object" || obj1[key] === null || typeof obj2[key] !== "object" || obj2[key] === null) {
-        if (obj1[key] !== obj2[key]) {
-          result[currentPath] = { from: obj1[key], to: obj2[key] }
-        }
-      } else {
-        const nestedModified = findModified(obj1[key], obj2[key], currentPath)
-        Object.assign(result, nestedModified)
-      }
+  if (isPlainObject(left) && isPlainObject(right)) {
+    for (const key of Object.keys(right)) {
+      if (!(key in left)) diff.added[child(key)] = right[key]
     }
+    for (const key of Object.keys(left)) {
+      if (!(key in right)) diff.removed[child(key)] = left[key]
+      else diffValues(left[key], right[key], child(key), diff)
+    }
+    return
   }
 
-  return result
+  if (Array.isArray(left) && Array.isArray(right)) {
+    const { added, removed } = diffArrays(left, right)
+    // Same elements in a different order counts as unchanged.
+    if (added.length) diff.added[path || "(root)"] = added
+    if (removed.length) diff.removed[path || "(root)"] = removed
+    return
+  }
+
+  // Everything else - scalars, and any type change such as object <-> scalar,
+  // array <-> object or null <-> value - is a modification.
+  if (!deepEqual(left, right)) {
+    diff.modified[path || "(root)"] = { from: left, to: right }
+  }
 }
 
 export function mergeJson(...jsons: string[]): string {

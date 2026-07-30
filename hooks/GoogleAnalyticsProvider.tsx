@@ -6,10 +6,8 @@ import { useEffect } from "react";
 export const GoogleAnalyticsProvider = () => {
     const pathname = usePathname();
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            pageview(location.href)
-        }
+        pageview(pathname)
     }, [pathname]);
 
-    return ""
+    return null
 }

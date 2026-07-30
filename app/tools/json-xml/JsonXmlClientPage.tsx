@@ -4,7 +4,7 @@ import { useState } from "react"
 import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { isValidJson } from "@/lib/utils"
+import { tryParseJson } from "@/lib/utils"
 import { RotateCw } from "lucide-react";
 import { json2xml } from "xml-js";
 
@@ -23,19 +23,17 @@ export default function JsonXmlClientPage() {
       return
     }
 
-    if (!isValidJson(json)) {
-      setError("Invalid JSON format")
+    const parsed = tryParseJson(json)
+    if (!parsed.ok) {
+      setError(parsed.error)
       return
     }
 
     try {
-      // We'll use a simple implementation here
-      // In a production app, you might want to use a library like js-xml
-      const parsed = JSON.parse(json)
-      const xmlResult = json2xml(parsed, { compact: true, spaces: 2 });
+      const xmlResult = json2xml(parsed.value, { compact: true, spaces: 2 });
       setXml(xmlResult)
     } catch (err) {
-      setError("Error converting JSON to XML")
+      setError(err instanceof Error ? `Error converting JSON to XML: ${err.message}` : "Error converting JSON to XML")
     }
   }
 
@@ -49,12 +47,10 @@ export default function JsonXmlClientPage() {
     }
 
     try {
-      // Simple XML to JSON conversion
-      // In a production app, you might want to use a library like js-xml
       const jsonResult = xml2Json(xml);
       setJson(JSON.stringify(jsonResult, null, 2))
     } catch (err) {
-      setError("Error converting XML to JSON")
+      setError(err instanceof Error ? `Error converting XML to JSON: ${err.message}` : "Error converting XML to JSON")
     }
   }
 
@@ -90,7 +86,7 @@ export default function JsonXmlClientPage() {
   <width>10</width>
   <height>5</height>
   <unit>cm</unit>
-</dimensions><product>`)
+</dimensions></product>`)
     setActiveTab("xml-to-json")
   }
 
@@ -98,14 +94,21 @@ export default function JsonXmlClientPage() {
     xml = `<?xml version="1.0" encoding="UTF-8"?>\n<root>` + xml + "</root>";
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xml, "text/xml");
+
+    // DOMParser never throws - it reports failures as a <parsererror> element.
+    const parserError = xmlDoc.getElementsByTagName("parsererror")[0];
+    if (parserError) {
+      const detail = (parserError.textContent ?? "").replace(/\s+/g, " ").trim();
+      throw new Error(detail || "The XML is not well-formed");
+    }
     
     function convert(node: Node) {
-        let obj = {};
+        const obj = {};
         if (node.nodeType === 1) { // Element node
           if (node.childNodes.length === 1 && node.firstChild?.nodeType === 3) { // Text node
             return node.firstChild?.nodeValue?.trim();
           } else {
-            for (let child of node.childNodes) {
+            for (const child of node.childNodes) {
               if (child.nodeType === 1) { // Element node
                 const childName = child.nodeName;
                 const childObj = convert(child);
@@ -126,7 +129,7 @@ export default function JsonXmlClientPage() {
     }
 
     const root: Element = xmlDoc.getElementsByTagName("root")[0];
-    let json = convert(root);
+    const json = convert(root);
     return json;
 }
 
@@ -202,7 +205,7 @@ export default function JsonXmlClientPage() {
           <div>
             <h3 className="text-xl font-semibold mb-2">XML</h3>
             <p className="text-muted-foreground">
-              XML (XML Ain't Markup Language) is a human-friendly data serialization standard that can be used in
+              XML (XML Ain&apos;t Markup Language) is a human-friendly data serialization standard that can be used in
               conjunction with all programming languages and is often used for configuration files.
             </p>
           </div>

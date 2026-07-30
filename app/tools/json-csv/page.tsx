@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description:
     "Convert between JSON and CSV formats easily. Transform your data between these popular data serialization formats.",
   keywords: KEYWORDS,
+  alternates: {
+    canonical: "/tools/json-csv",
+  },
 }
 
 export default function JsonCSVPage() {

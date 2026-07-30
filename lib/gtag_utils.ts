@@ -1,8 +1,13 @@
 export const GA_TRACKING_ID = process.env.NODE_ENV === "production" ? "G-YF0MZF0GGG" : "G-J3MNQZE15J";
 
-export const pageview = (url: string): void => {
-    window.gtag("config", GA_TRACKING_ID, {
-        page_path: url,
+// The gtag `config` call in the root layout runs with `send_page_view: false`,
+// so every pageview - including the first one - is sent from here exactly once.
+export const pageview = (path: string): void => {
+    if (typeof window === "undefined" || !window.gtag) return;
+
+    window.gtag("event", "page_view", {
+        page_path: path,
+        page_location: window.location.href,
         isGuest: true,
     });
 };

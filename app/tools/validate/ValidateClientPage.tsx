@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
-import { formatJson } from "@/lib/utils"
+import { tryParseJson } from "@/lib/utils"
 import { FileCheck, CheckCircle, XCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
@@ -26,31 +26,18 @@ export default function ValidateClientPage() {
       return
     }
 
-    try {
-      // Try to parse the JSON
-      JSON.parse(json)
-
-      // Format the JSON for better readability
-      const formatted = formatJson(json)
-
-      setValidationResult({
-        valid: true,
-        message: "JSON is valid",
-        formattedJson: formatted,
-      })
-    } catch (error) {
-      if (error instanceof Error) {
-        setValidationResult({
-          valid: false,
-          message: `Invalid JSON: ${error.message}`,
-        })
-      } else {
-        setValidationResult({
-          valid: false,
-          message: "Invalid JSON format",
-        })
-      }
+    // Parse once - the parsed value is reused to produce the formatted output.
+    const parsed = tryParseJson(json)
+    if (!parsed.ok) {
+      setValidationResult({ valid: false, message: parsed.error })
+      return
     }
+
+    setValidationResult({
+      valid: true,
+      message: "JSON is valid",
+      formattedJson: JSON.stringify(parsed.value, null, 2),
+    })
   }
 
   // Sample data for demonstration
@@ -133,7 +120,7 @@ export default function ValidateClientPage() {
       </div>
 
       {validationResult && (
-        <Alert className={validationResult.valid ? "bg-green-50 dark:bg-green-950/20" : "bg-red-50 dark:bg-red-950/20"}>
+        <Alert role="status" aria-live="polite" className={validationResult.valid ? "bg-green-50 dark:bg-green-950/20" : "bg-red-50 dark:bg-red-950/20"}>
           <div className="flex items-center gap-2">
             {validationResult.valid ? (
               <CheckCircle className="h-5 w-5 text-green-500" />

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
-import { isValidJson, formatJson, minifyJson } from "@/lib/utils"
+import { tryParseJson } from "@/lib/utils"
 import { FileJson } from "lucide-react"
 
 export default function JsonFormatterClientPage() {
@@ -22,14 +22,14 @@ export default function JsonFormatterClientPage() {
       return
     }
 
-    if (!isValidJson(json)) {
-      setError("Invalid JSON format")
+    const parsed = tryParseJson(json)
+    if (!parsed.ok) {
+      setError(parsed.error)
       return
     }
 
     try {
-      const formatted = formatJson(json, indentation)
-      setFormattedJson(formatted)
+      setFormattedJson(JSON.stringify(parsed.value, null, indentation))
     } catch (err) {
       setError("Error formatting JSON")
     }
@@ -44,14 +44,14 @@ export default function JsonFormatterClientPage() {
       return
     }
 
-    if (!isValidJson(json)) {
-      setError("Invalid JSON format")
+    const parsed = tryParseJson(json)
+    if (!parsed.ok) {
+      setError(parsed.error)
       return
     }
 
     try {
-      const minified = minifyJson(json)
-      setFormattedJson(minified)
+      setFormattedJson(JSON.stringify(parsed.value))
     } catch (err) {
       setError("Error minifying JSON")
     }

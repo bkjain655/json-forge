@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { JsonEditor } from "@/components/json-editor"
-import { isValidJson, mergeJson } from "@/lib/utils"
+import { mergeJson, tryParseJson } from "@/lib/utils"
 import { GitMerge, Plus, Trash } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -55,9 +55,10 @@ export default function JsonMergePageClient() {
         return "JSON cannot be empty"
       }
 
-      if (!isValidJson(json)) {
+      const parsed = tryParseJson(json)
+      if (!parsed.ok) {
         hasError = true
-        return "Invalid JSON format"
+        return parsed.error
       }
 
       return ""
@@ -154,7 +155,7 @@ export default function JsonMergePageClient() {
       )}
 
       {result && (
-        <div>
+        <div role="status" aria-live="polite">
           <h2 className="text-2xl font-bold text-center mb-4">Merged Result</h2>
           <JsonEditor value={result} onChange={() => {}} readOnly height="h-[300px]" />
         </div>

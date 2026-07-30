@@ -1,3 +1,5 @@
+import { SITE_URL } from "@/lib/constants"
+
 export const metadata = {
     title: "Privacy Policy | JSON Forge",
     description: "Read the Privacy Policy of JSON Forge regarding data collection, cookies, and user privacy.",
@@ -14,10 +16,13 @@ export const metadata = {
         "Data Protection",
         "Online Tool Privacy"
     ],
+    alternates: {
+        canonical: "/privacy-policy",
+    },
     openGraph: {
         title: "Privacy Policy | JSON Forge",
         description: "Read the Privacy Policy of JSON Forge regarding data collection, cookies, and user privacy.",
-        url: "https://jsonforge.com/privacy-policy",
+        url: `${SITE_URL}/privacy-policy`,
         siteName: "JSON Forge",
         type: "website"
     },

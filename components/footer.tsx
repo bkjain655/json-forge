@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FileJson } from "lucide-react";
+import { AUTHOR_NAME, AUTHOR_URL } from "@/lib/constants";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -15,12 +16,9 @@ export default function Footer() {
 
         {/* Links Section */}
         <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-          <Link href="/about-us" className="hover:underline">
+          <Link href="/about" className="hover:underline">
             About Us
           </Link>
-          {/* <Link href="/connect" className="hover:underline">
-            Connect with Me
-          </Link> */}
           <Link href="/privacy-policy" className="hover:underline">
             Privacy Policy
           </Link>
@@ -33,9 +31,20 @@ export default function Footer() {
         </div>
 
         {/* Copyright Section */}
-        <p className="text-sm text-muted-foreground">
-          &copy; {currentYear} JSON Forge. All rights reserved.
-        </p>
+        <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
+          <p>&copy; {currentYear} JSON Forge. All rights reserved.</p>
+          <p>
+            Built by{" "}
+            <a
+              href={AUTHOR_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground/80 hover:text-foreground hover:underline"
+            >
+              {AUTHOR_NAME}
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   );

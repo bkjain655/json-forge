@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description:
     "Convert between JSON and XML formats easily. Transform your data between these popular data serialization formats.",
   keywords: KEYWORDS,
+  alternates: {
+    canonical: "/tools/json-xml",
+  },
 }
 
 export default function JsonXmlPage() {

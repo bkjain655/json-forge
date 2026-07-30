@@ -4,8 +4,8 @@ import { useState } from "react"
 import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { isValidJson } from "@/lib/utils"
 import { RotateCw } from "lucide-react"
+import { dump as yamlDump, load as yamlLoad } from "js-yaml"
 
 export default function JsonYamlClientPage() {
   const [json, setJson] = useState("")
@@ -22,19 +22,18 @@ export default function JsonYamlClientPage() {
       return
     }
 
-    if (!isValidJson(json)) {
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(json)
+    } catch {
       setError("Invalid JSON format")
       return
     }
 
     try {
-      // We'll use a simple implementation here
-      // In a production app, you might want to use a library like js-yaml
-      const parsed = JSON.parse(json)
-      const yamlResult = jsonToYaml(parsed)
-      setYaml(yamlResult)
+      setYaml(yamlDump(parsed, { indent: 2, lineWidth: -1, noRefs: true }))
     } catch (err) {
-      setError("Error converting JSON to YAML")
+      setError(err instanceof Error ? `Error converting JSON to YAML: ${err.message}` : "Error converting JSON to YAML")
     }
   }
 
@@ -48,169 +47,15 @@ export default function JsonYamlClientPage() {
     }
 
     try {
-      // Simple YAML to JSON conversion
-      // In a production app, you might want to use a library like js-yaml
-      const jsonResult = yamlToJson(yaml)
-      setJson(JSON.stringify(JSON.parse(jsonResult), null, 2))
+      const parsed = yamlLoad(yaml)
+      if (parsed === undefined) {
+        setError("The YAML document is empty")
+        return
+      }
+      setJson(JSON.stringify(parsed, null, 2))
     } catch (err) {
-      setError("Error converting YAML to JSON")
+      setError(err instanceof Error ? `Error converting YAML to JSON: ${err.message}` : "Error converting YAML to JSON")
     }
-  }
-
-  // Very basic JSON to YAML converter
-  // For a production app, use a proper library
-  const jsonToYaml = (obj: any, indent = 0): string => {
-    if (obj === null) return "null\n"
-
-    const spaces = " ".repeat(indent)
-    let result = ""
-
-    if (Array.isArray(obj)) {
-      if (obj.length === 0) return "[]\n"
-
-      for (const item of obj) {
-        result += `${spaces}- `
-
-        if (typeof item === "object" && item !== null) {
-          if (Array.isArray(item)) {
-            result += "\n" + jsonToYaml(item, indent + 2)
-          } else {
-            result += "\n"
-            for (const [key, value] of Object.entries(item)) {
-              result += `${spaces}  ${key}: `
-              if (typeof value === "object" && value !== null) {
-                result += "\n" + jsonToYaml(value, indent + 4).replace(/^/gm, spaces + "  ")
-              } else {
-                result += formatYamlValue(value) + "\n"
-              }
-            }
-          }
-        } else {
-          result += formatYamlValue(item) + "\n"
-        }
-      }
-    } else if (typeof obj === "object") {
-      for (const [key, value] of Object.entries(obj)) {
-        result += `${spaces}${key}: `
-
-        if (typeof value === "object" && value !== null) {
-          result += "\n" + jsonToYaml(value, indent + 2)
-        } else {
-          result += formatYamlValue(value) + "\n"
-        }
-      }
-    } else {
-      result += formatYamlValue(obj) + "\n"
-    }
-
-    return result
-  }
-
-  const formatYamlValue = (value: any): string => {
-    if (typeof value === "string") {
-      // Check if string needs quotes
-      if (value.match(/[:#{}[\],&*?|<>=!%@`]/)) {
-        return `"${value.replace(/"/g, '\\"')}"`
-      }
-      return value
-    }
-    return String(value)
-  }
-
-  // Very basic YAML to JSON converter
-  // For a production app, use a proper library
-  const yamlToJson = (yamlStr: string): string => {
-    // This is a very simplified implementation
-    // In a real app, use a proper YAML parser
-
-    // Remove comments
-    yamlStr = yamlStr.replace(/#.*$/gm, "")
-
-    // Handle basic YAML to JSON conversion
-    const jsonObj: any = {}
-    let currentIndent = 0
-    let currentPath: string[] = []
-
-    const lines = yamlStr.split("\n")
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trimRight()
-      if (!line.trim()) continue
-
-      const indent = line.search(/\S/)
-      const keyMatch = line.match(/^(\s*)([^:]+):\s*(.*)$/)
-
-      if (keyMatch) {
-        const [, , key, value] = keyMatch
-
-        if (indent < currentIndent) {
-          // Going back up in the hierarchy
-          const levelsUp = (currentIndent - indent) / 2
-          currentPath = currentPath.slice(0, -levelsUp)
-        }
-
-        currentIndent = indent
-
-        if (value.trim()) {
-          // Key with inline value
-          setNestedValue(jsonObj, [...currentPath, key.trim()], parseYamlValue(value.trim()))
-        } else {
-          // Key with nested value
-          currentPath.push(key.trim())
-        }
-      } else if (line.trim().startsWith("-")) {
-        // Array item
-        const value = line.trim().substring(1).trim()
-        const arrayPath = [...currentPath]
-        const arrayKey = arrayPath.pop() || ""
-
-        let array = getNestedValue(jsonObj, arrayPath)[arrayKey]
-        if (!Array.isArray(array)) {
-          array = []
-          setNestedValue(jsonObj, arrayPath, arrayKey)
-        }
-
-        array.push(parseYamlValue(value))
-      }
-    }
-
-    return JSON.stringify(jsonObj)
-  }
-
-  const parseYamlValue = (value: string): any => {
-    if (value === "null") return null
-    if (value === "true") return true
-    if (value === "false") return false
-    if (value.match(/^-?\d+$/)) return Number.parseInt(value, 10)
-    if (value.match(/^-?\d+\.\d+$/)) return Number.parseFloat(value)
-
-    // Handle quoted strings
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      return value.substring(1, value.length - 1)
-    }
-
-    return value
-  }
-
-  const setNestedValue = (obj: any, path: string[], value: any): void => {
-    const lastKey = path.pop()
-
-    let current = obj
-    for (const key of path) {
-      if (!current[key]) current[key] = {}
-      current = current[key]
-    }
-
-    if (lastKey) current[lastKey] = value
-  }
-
-  const getNestedValue = (obj: any, path: string[]): any => {
-    let current = obj
-    for (const key of path) {
-      if (!current[key]) current[key] = {}
-      current = current[key]
-    }
-    return current
   }
 
   // Sample data for demonstration
@@ -321,7 +166,7 @@ dimensions:
           <div>
             <h3 className="text-xl font-semibold mb-2">YAML</h3>
             <p className="text-muted-foreground">
-              YAML (YAML Ain't Markup Language) is a human-friendly data serialization standard that can be used in
+              YAML (YAML Ain&apos;t Markup Language) is a human-friendly data serialization standard that can be used in
               conjunction with all programming languages and is often used for configuration files.
             </p>
           </div>

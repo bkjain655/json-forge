@@ -4,13 +4,17 @@ import { ArrowRight, Code, FileJson, GitCompare, GitMerge, RotateCw, FileCheck }
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Description from "@/components/ui/description"
-import { KEYWORDS } from "@/lib/constants"
+import { CONTENT as FAQ_CONTENT } from "@/lib/faq-content"
+import { KEYWORDS, SITE_URL } from "@/lib/constants"
 
 export const metadata: Metadata = {
   title: "JSON Forge - Developer Utilities for JSON Operations",
   description:
     "Free online JSON Forge for developers - compare, merge, validate, format, convert JSON to YAML, generate schemas and more.",
   keywords: KEYWORDS,
+  alternates: {
+    canonical: "/",
+  },
 }
 
 export default function Home() {
@@ -65,8 +69,43 @@ export default function Home() {
     },
   ]
 
+  const softwareApplicationLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "JSON Forge",
+    url: SITE_URL,
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Any",
+    description:
+      "Free online JSON utilities for developers - compare, merge, validate, format, convert JSON to YAML, XML and CSV, and generate schemas.",
+    featureList: tools.map((tool) => tool.title),
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  }
+
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ_CONTENT.map((item) => ({
+      "@type": "Question",
+      name: item.title,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.description.join(" "),
+      },
+    })),
+  }
+
   return (
     <div className="container mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationLd) }}
+      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <div className="text-center mb-16">
         <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-4">JSON Forge for Developers</h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">

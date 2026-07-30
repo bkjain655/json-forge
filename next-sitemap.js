@@ -1,6 +1,5 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-    siteUrl: 'https://jsonforge.com',
-    generateRobotsTxt: true, 
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.jsonforge.com',
+    generateRobotsTxt: true,
 }
-  

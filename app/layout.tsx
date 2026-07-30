@@ -2,8 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import './globals.css'
-import { KEYWORDS } from "@/lib/constants";
+import { KEYWORDS, SITE_URL } from "@/lib/constants";
 import Script from "next/script";
 import { GA_TRACKING_ID } from "@/lib/gtag_utils";
 import { Analytics } from "@vercel/analytics/react";
@@ -11,11 +10,13 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { Toaster } from "@/components/ui/sonner"
 import { GoogleAnalyticsProvider } from "@/hooks/GoogleAnalyticsProvider"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     template: "%s | JSON Forge",
     default: "JSON Forge - Developer Utilities for JSON Operations",
@@ -26,16 +27,21 @@ export const metadata: Metadata = {
   icons: "/favicon/favicon.ico",
   authors: [{ name: "JSON Forge" }],
   creator: "JSON Forge",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://jsonforge.com",
+    url: SITE_URL,
     title: "JSON Forge - Developer Utilities for JSON Operations",
     description:
       "Free online JSON Forge for developers - compare, merge, validate, format, convert JSON to YAML, generate schemas and more.",
     siteName: "JSON Forge",
   },
   twitter: {
+    // The card image comes from app/opengraph-image.tsx - Next reuses the
+    // Open Graph image for Twitter when no twitter-image route exists.
     card: "summary_large_image",
     title: "JSON Forge - Developer Utilities for JSON Operations",
     description:
@@ -51,20 +57,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <Script id="ga-analytics" 
+        <Script id="ga-analytics"
             strategy="afterInteractive"
             src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}>
         </Script>
         <Script id="ga-analytics-init" strategy="afterInteractive">
             {
+                // send_page_view: false - GoogleAnalyticsProvider owns pageviews,
+                // including the initial one, so they are not counted twice.
                 `window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${GA_TRACKING_ID}', { page_path: window.location.pathname });`
+                gtag('config', '${GA_TRACKING_ID}', { send_page_view: false });`
             }
         </Script>
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1302626070893007"
-          crossOrigin="anonymous"></script>
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
@@ -73,10 +79,11 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          <Toaster />
         </ThemeProvider>
         <SpeedInsights />
         <GoogleAnalyticsProvider />
-        
+
         <Analytics />
       </body>
     </html>

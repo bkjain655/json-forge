@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description:
     "Compare two JSON objects and highlight the differences between them. Identify added, removed, and modified properties.",
   keywords: KEYWORDS,
+  alternates: {
+    canonical: "/tools/compare",
+  },
 }
 
 export default function JsonComparePage() {

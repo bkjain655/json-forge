@@ -1,12 +1,12 @@
+import { dirname } from "path"
+import { fileURLToPath } from "url"
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   devIndicators: false,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // Pin the trace root to this project; a stray lockfile above it would
+  // otherwise make Next infer the parent directory as the workspace root.
+  outputFileTracingRoot: dirname(fileURLToPath(import.meta.url)),
   images: {
     unoptimized: true,
   },

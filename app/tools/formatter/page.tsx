@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description:
     "Format and beautify your JSON data with customizable indentation. Make your JSON readable and well-structured.",
   keywords: KEYWORDS,
+  alternates: {
+    canonical: "/tools/formatter",
+  },
 }
 
 export default function JsonFormatterPage() {

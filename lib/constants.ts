@@ -1,3 +1,9 @@
+// Canonical host is the www form - the apex redirects to it in production.
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.jsonforge.com";
+
+export const AUTHOR_NAME = "Bhavesh Kumar";
+export const AUTHOR_URL = "https://bkjtech-world.vercel.app/";
+
 export const KEYWORDS = [
     "JSON tools", "JSON Forge", "JSON utilities", "JSON operations", "JSON online tools",
     "Merge JSON", "Compare JSON", "JSON formatter", "JSON validator",

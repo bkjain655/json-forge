@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description:
     "Validate your JSON data to ensure it has correct syntax and structure. Fix JSON errors with our online validator tool.",
   keywords: KEYWORDS,
+  alternates: {
+    canonical: "/tools/validate",
+  },
 }
 
 export default function JsonValidatePage() {

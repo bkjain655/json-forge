@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "JSON Merge - Merge Multiple JSON Objects",
   description: "Merge multiple JSON objects into a single JSON object. Combine data from different sources easily.",
   keywords: KEYWORDS,
+  alternates: {
+    canonical: "/tools/merge",
+  },
 }
 
 export default function JsonMergePage() {

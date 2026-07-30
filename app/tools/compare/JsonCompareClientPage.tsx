@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { isValidJson, compareJson } from "@/lib/utils"
+import { compareJson, tryParseJson } from "@/lib/utils"
 import { GitCompare } from "lucide-react"
 
 export default function JsonCompareClientPage() {
@@ -29,13 +29,15 @@ export default function JsonCompareClientPage() {
       return
     }
 
-    if (!isValidJson(json1)) {
-      setError1("Invalid JSON format")
+    const parsed1 = tryParseJson(json1)
+    if (!parsed1.ok) {
+      setError1(parsed1.error)
       return
     }
 
-    if (!isValidJson(json2)) {
-      setError2("Invalid JSON format")
+    const parsed2 = tryParseJson(json2)
+    if (!parsed2.ok) {
+      setError2(parsed2.error)
       return
     }
 
@@ -87,10 +89,8 @@ export default function JsonCompareClientPage() {
   }
 
   useEffect(() => {
-    // Clear results when inputs change
-    if (result) {
-      setResult(null)
-    }
+    // Clear stale results whenever either input changes.
+    setResult(null)
   }, [json1, json2])
 
   return (
@@ -117,7 +117,7 @@ export default function JsonCompareClientPage() {
       </div>
 
       {result && (
-        <div className="space-y-6">
+        <div className="space-y-6" role="status" aria-live="polite">
           <h2 className="text-2xl font-bold text-center">Comparison Results</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

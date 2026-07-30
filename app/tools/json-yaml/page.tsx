@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description:
     "Convert between JSON and YAML formats easily. Transform your data between these popular data serialization formats.",
   keywords: KEYWORDS,
+  alternates: {
+    canonical: "/tools/json-yaml",
+  },
 }
 
 export default function JsonYamlPage() {
