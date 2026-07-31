@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://www.jsonforge.com/opengraph-image</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.267Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/contact-us</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/tools/compare</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/tools/json-xml</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/tools/json-csv</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/about</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/tools/json-yaml</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/terms-and-conditions</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/privacy-policy</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/tools/validate</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/tools/merge</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/tools/formatter</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
-<url><loc>https://www.jsonforge.com/tools/schema-generator</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-30T19:01:56.268Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/opengraph-image</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.204Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/contact-us</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/terms-and-conditions</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/tools/json-yaml</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/tools/formatter</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/tools/schema-generator</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/tools/compare</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/tools/json-xml</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/about</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/privacy-policy</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/tools/json-csv</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/tools/validate</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
+<url><loc>https://www.jsonforge.com/tools/merge</loc><changefreq>daily</changefreq><priority>0.7</priority><lastmod>2026-07-31T04:55:24.208Z</lastmod></url>
 </urlset>
