@@ -1,5 +1,6 @@
-// Canonical host is the www form - the apex redirects to it in production.
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.jsonforge.com";
+// Canonical host is the apex; www redirects to it in production. Keep this in
+// sync with the NEXT_PUBLIC_SITE_URL env var set in Vercel.
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://jsonforge.com";
 
 export const AUTHOR_NAME = "Bhavesh Kumar";
 export const AUTHOR_URL = "https://bkjlabs.com";
