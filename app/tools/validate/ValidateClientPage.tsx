@@ -1,14 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
+import { ShareButton } from "@/components/ui/share-button"
 import { tryParseJson } from "@/lib/utils"
+import { useSharedInput } from "@/hooks/use-shared-input"
 import { FileCheck, CheckCircle, XCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { ToolHeader } from "@/components/tool-header"
 
 export default function ValidateClientPage() {
+  const { initialValue } = useSharedInput()
   const [json, setJson] = useState("")
+
+  // Hydrate from a shared permalink on first client render.
+  useEffect(() => {
+    if (initialValue) setJson(initialValue)
+  }, [initialValue])
   const [validationResult, setValidationResult] = useState<{
     valid: boolean
     message: string
@@ -96,20 +105,17 @@ export default function ValidateClientPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <FileCheck className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h1 className="text-3xl font-bold mb-2">JSON Validator</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Validate your JSON data to ensure it has correct syntax and structure. Fix JSON errors with our online
-          validator tool.
-        </p>
-      </div>
+      <ToolHeader
+        icon={FileCheck}
+        title="JSON Validator"
+        description="Validate your JSON to ensure it has correct syntax and structure — errors are underlined on the exact line as you type."
+      />
 
       <div className="mb-6">
         <JsonEditor value={json} onChange={setJson} label="Enter JSON to validate" />
       </div>
 
-      <div className="flex justify-center gap-4 mb-8">
+      <div className="flex flex-wrap justify-center gap-4 mb-8">
         <Button onClick={handleValidate}>Validate JSON</Button>
         <Button variant="outline" onClick={loadSampleData}>
           Load Valid Sample
@@ -117,6 +123,7 @@ export default function ValidateClientPage() {
         <Button variant="outline" onClick={loadInvalidSample}>
           Load Invalid Sample
         </Button>
+        <ShareButton value={json} />
       </div>
 
       {validationResult && (

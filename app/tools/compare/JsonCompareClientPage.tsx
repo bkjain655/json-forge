@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { compareJson, tryParseJson } from "@/lib/utils"
 import { GitCompare } from "lucide-react"
+import { ToolHeader } from "@/components/tool-header"
 
 export default function JsonCompareClientPage() {
   const [json1, setJson1] = useState("")
@@ -95,14 +96,11 @@ export default function JsonCompareClientPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <GitCompare className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h1 className="text-3xl font-bold mb-2">JSON Compare</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Compare two JSON objects and identify the differences between them. See what properties were added, removed,
-          or modified.
-        </p>
-      </div>
+      <ToolHeader
+        icon={GitCompare}
+        title="JSON Compare"
+        description="Compare two JSON objects and see exactly what was added, removed, or modified."
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <JsonEditor value={json1} onChange={setJson1} label="First JSON" error={error1} />

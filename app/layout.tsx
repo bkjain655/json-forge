@@ -10,6 +10,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { AppCommandPalette } from "@/components/app-command-palette"
 import { Toaster } from "@/components/ui/sonner"
 import { GoogleAnalyticsProvider } from "@/hooks/GoogleAnalyticsProvider"
 
@@ -27,6 +28,11 @@ export const metadata: Metadata = {
   icons: "/favicon/favicon.ico",
   authors: [{ name: "JSON Forge" }],
   creator: "JSON Forge",
+  // Google Search Console "HTML tag" verification. Set GOOGLE_SITE_VERIFICATION
+  // to the token GSC gives you; when unset, no tag is emitted (no harm).
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
   alternates: {
     canonical: "/",
   },
@@ -79,6 +85,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          <AppCommandPalette />
           <Toaster />
         </ThemeProvider>
         <SpeedInsights />

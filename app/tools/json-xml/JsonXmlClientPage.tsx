@@ -1,18 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
+import { ShareButton } from "@/components/ui/share-button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { tryParseJson } from "@/lib/utils"
+import { useSharedInput } from "@/hooks/use-shared-input"
 import { RotateCw } from "lucide-react";
+import { ToolHeader } from "@/components/tool-header"
 import { json2xml } from "xml-js";
 
 export default function JsonXmlClientPage() {
+  const { initialValue } = useSharedInput()
   const [json, setJson] = useState("")
   const [xml, setXml] = useState("")
   const [activeTab, setActiveTab] = useState("json-to-xml")
   const [error, setError] = useState("")
+
+  // Hydrate the JSON input from a shared permalink on first client render.
+  useEffect(() => {
+    if (initialValue) {
+      setJson(initialValue)
+      setActiveTab("json-to-xml")
+    }
+  }, [initialValue])
 
   const handleJsonToXml = () => {
     setError("")
@@ -135,13 +147,11 @@ export default function JsonXmlClientPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <RotateCw className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h1 className="text-3xl font-bold mb-2">JSON ↔ XML Converter</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Convert between JSON and XML formats. Transform your data between these popular data serialization formats.
-        </p>
-      </div>
+      <ToolHeader
+        icon={RotateCw}
+        title="JSON ↔ XML Converter"
+        description="Convert freely between JSON and XML — two of the most common data serialization formats."
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="grid w-full grid-cols-2">
@@ -157,8 +167,9 @@ export default function JsonXmlClientPage() {
             error={activeTab === "json-to-xml" ? error : ""}
           />
 
-          <div className="flex justify-center">
+          <div className="flex flex-wrap justify-center gap-4">
             <Button onClick={handleJsonToXml}>Convert to XML</Button>
+            <ShareButton value={json} />
           </div>
 
           {xml && <JsonEditor fileType={'xml'} value={xml} onChange={() => {}} label="XML Output" readOnly />}
@@ -175,6 +186,7 @@ export default function JsonXmlClientPage() {
             value={xml}
             onChange={setXml}
             label="XML Input"
+            lint={false}
             error={activeTab === "xml-to-json" ? error : ""}
           />
 
@@ -192,25 +204,6 @@ export default function JsonXmlClientPage() {
         </TabsContent>
       </Tabs>
 
-      <div className="mt-12 max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">About JSON and XML</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-xl font-semibold mb-2">JSON</h3>
-            <p className="text-muted-foreground">
-              JSON (JavaScript Object Notation) is a lightweight data-interchange format that is easy for humans to read
-              and write and easy for machines to parse and generate.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2">XML</h3>
-            <p className="text-muted-foreground">
-              XML (XML Ain&apos;t Markup Language) is a human-friendly data serialization standard that can be used in
-              conjunction with all programming languages and is often used for configuration files.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

@@ -1,15 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
+import { ShareButton } from "@/components/ui/share-button"
 import { tryParseJson } from "@/lib/utils"
+import { useSharedInput } from "@/hooks/use-shared-input"
 import { Code } from "lucide-react"
+import { ToolHeader } from "@/components/tool-header"
 
 export default function JsonSchemaGeneratorClientPage() {
+  const { initialValue } = useSharedInput()
   const [json, setJson] = useState("")
   const [schema, setSchema] = useState("")
   const [error, setError] = useState("")
+
+  // Hydrate from a shared permalink on first client render.
+  useEffect(() => {
+    if (initialValue) setJson(initialValue)
+  }, [initialValue])
 
   const generateSchema = () => {
     setError("")
@@ -101,13 +110,11 @@ export default function JsonSchemaGeneratorClientPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <Code className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h1 className="text-3xl font-bold mb-2">JSON Schema Generator</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Generate JSON Schema from your JSON data. Create schemas for validation and documentation purposes.
-        </p>
-      </div>
+      <ToolHeader
+        icon={Code}
+        title="JSON Schema Generator"
+        description="Generate a JSON Schema from your JSON data — for validation and documentation."
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div>
@@ -118,31 +125,14 @@ export default function JsonSchemaGeneratorClientPage() {
         </div>
       </div>
 
-      <div className="flex justify-center gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
         <Button onClick={generateSchema}>Generate Schema</Button>
         <Button variant="outline" onClick={loadSampleData}>
           Load Sample Data
         </Button>
+        <ShareButton value={json} />
       </div>
 
-      <div className="mt-12 max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">About JSON Schema</h2>
-        <p className="mb-4">
-          JSON Schema is a vocabulary that allows you to annotate and validate JSON documents. It describes your
-          existing data format with clear, human- and machine-readable documentation.
-        </p>
-        <p className="mb-4">The generated schema follows the JSON Schema specification and can be used for:</p>
-        <ul className="list-disc pl-6 mb-4 space-y-2">
-          <li>Validating data against a schema</li>
-          <li>Documenting the structure of your JSON data</li>
-          <li>Generating code, forms, or documentation</li>
-          <li>Testing and ensuring data quality</li>
-        </ul>
-        <p>
-          Note: This is a basic schema generator. For more complex schemas with additional validation rules, you may
-          need to modify the generated schema manually.
-        </p>
-      </div>
     </div>
   )
 }

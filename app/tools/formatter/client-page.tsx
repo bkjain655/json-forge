@@ -1,63 +1,57 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { JsonEditor } from "@/components/json-editor"
+import { JsonTree } from "@/components/json-tree"
+import { ToolHeader } from "@/components/tool-header"
 import { Button } from "@/components/ui/button"
+import { ShareButton } from "@/components/ui/share-button"
 import { Slider } from "@/components/ui/slider"
-import { tryParseJson } from "@/lib/utils"
+import { tryParseJson, cn } from "@/lib/utils"
+import { useSharedInput } from "@/hooks/use-shared-input"
 import { FileJson } from "lucide-react"
 
+type Mode = "beautify" | "minify"
+type OutputView = "text" | "tree"
+
 export default function JsonFormatterClientPage() {
+  const { initialValue } = useSharedInput()
   const [json, setJson] = useState("")
   const [formattedJson, setFormattedJson] = useState("")
+  const [parsed, setParsed] = useState<unknown>(null)
+  const [outputView, setOutputView] = useState<OutputView>("text")
   const [indentation, setIndentation] = useState(2)
+  const [mode, setMode] = useState<Mode>("beautify")
   const [error, setError] = useState("")
 
-  const handleFormat = () => {
-    setError("")
-    setFormattedJson("")
+  // Hydrate from a shared permalink on first client render.
+  useEffect(() => {
+    if (initialValue) setJson(initialValue)
+  }, [initialValue])
 
-    if (!json.trim()) {
-      setError("Please enter JSON to format")
-      return
-    }
+  // Live: reformat as the user types / changes options (debounced for large input).
+  useEffect(() => {
+    const id = setTimeout(() => {
+      if (!json.trim()) {
+        setError("")
+        setFormattedJson("")
+        setParsed(null)
+        return
+      }
+      const result = tryParseJson(json)
+      if (!result.ok) {
+        setError(result.error)
+        setFormattedJson("")
+        setParsed(null)
+        return
+      }
+      setError("")
+      setParsed(result.value)
+      setFormattedJson(mode === "minify" ? JSON.stringify(result.value) : JSON.stringify(result.value, null, indentation))
+    }, 150)
+    return () => clearTimeout(id)
+  }, [json, indentation, mode])
 
-    const parsed = tryParseJson(json)
-    if (!parsed.ok) {
-      setError(parsed.error)
-      return
-    }
-
-    try {
-      setFormattedJson(JSON.stringify(parsed.value, null, indentation))
-    } catch (err) {
-      setError("Error formatting JSON")
-    }
-  }
-
-  const handleMinify = () => {
-    setError("")
-    setFormattedJson("")
-
-    if (!json.trim()) {
-      setError("Please enter JSON to minify")
-      return
-    }
-
-    const parsed = tryParseJson(json)
-    if (!parsed.ok) {
-      setError(parsed.error)
-      return
-    }
-
-    try {
-      setFormattedJson(JSON.stringify(parsed.value))
-    } catch (err) {
-      setError("Error minifying JSON")
-    }
-  }
-
-  // Sample data for demonstration
   const loadSampleData = () => {
     setJson(
       '{"name":"John Doe","age":30,"isActive":true,"address":{"street":"123 Main St","city":"New York","zip":"10001"},"phoneNumbers":[{"type":"home","number":"212-555-1234"},{"type":"work","number":"646-555-4567"}]}',
@@ -65,68 +59,95 @@ export default function JsonFormatterClientPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <FileJson className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h1 className="text-3xl font-bold mb-2">JSON Formatter</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Format and beautify your JSON data with customizable indentation. Make your JSON readable and well-structured.
-        </p>
-      </div>
+    <div className="container mx-auto px-4">
+      <div className="py-10 sm:py-14">
+        <ToolHeader
+          icon={FileJson}
+          title="JSON Formatter"
+          description="Beautify or minify your JSON — formatted live as you type. Runs entirely in your browser."
+        />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div>
-          <JsonEditor value={json} onChange={setJson} label="JSON Input" error={error} />
+        {/* Controls */}
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            {/* Mode toggle */}
+            <div className="inline-flex rounded-md border border-border bg-secondary/40 p-0.5">
+              {(["beautify", "minify"] as Mode[]).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  aria-pressed={mode === m}
+                  className={cn(
+                    "rounded-[5px] px-3 py-1.5 text-sm font-medium capitalize transition-colors",
+                    mode === m ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+            {mode === "beautify" && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Indent</span>
+                <Slider
+                  value={[indentation]}
+                  min={1}
+                  max={8}
+                  step={1}
+                  onValueChange={(value) => setIndentation(value[0])}
+                  className="w-28"
+                  aria-label="Indentation"
+                />
+                <span className="w-4 text-sm font-medium tabular-nums text-muted-foreground">{indentation}</span>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="ghost" size="sm" onClick={loadSampleData}>Load sample</Button>
+            <ShareButton value={json} />
+          </div>
         </div>
-        <div>
-          <JsonEditor value={formattedJson} onChange={() => {}} label="Formatted JSON" readOnly />
-        </div>
-      </div>
 
-      <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-8">
-        <div className="flex items-center gap-4 w-full max-w-xs">
-          <span className="text-sm font-medium">Indentation:</span>
-          <Slider
-            value={[indentation]}
-            min={1}
-            max={8}
-            step={1}
-            onValueChange={(value) => setIndentation(value[0])}
-            className="w-32"
-          />
-          <span className="text-sm font-medium">{indentation}</span>
-        </div>
-        <div className="flex gap-4">
-          <Button onClick={handleFormat}>Format JSON</Button>
-          <Button variant="outline" onClick={handleMinify}>
-            Minify JSON
-          </Button>
-          <Button variant="outline" onClick={loadSampleData}>
-            Load Sample Data
-          </Button>
-        </div>
-      </div>
+        {/* Editors */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <JsonEditor value={json} onChange={setJson} label="JSON input" error={error} />
 
-      <div className="mt-12 max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">JSON Formatting Tips</h2>
-        <ul className="list-disc pl-6 space-y-2">
-          <li>
-            <strong>Beautify JSON</strong> - Format your JSON with proper indentation to make it more readable for
-            humans.
-          </li>
-          <li>
-            <strong>Minify JSON</strong> - Remove all whitespace to reduce file size for production or transmission.
-          </li>
-          <li>
-            <strong>Validate Structure</strong> - Ensure your JSON is valid before using it in your applications.
-          </li>
-          <li>
-            <strong>Consistent Indentation</strong> - Use consistent indentation (2 or 4 spaces are common) for better
-            readability.
-          </li>
-        </ul>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-foreground">
+                {mode === "minify" ? "Minified output" : "Formatted output"}
+              </p>
+              {/* Text / Tree view toggle */}
+              <div className="inline-flex rounded-md border border-border bg-secondary/40 p-0.5">
+                {(["text", "tree"] as OutputView[]).map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setOutputView(v)}
+                    aria-pressed={outputView === v}
+                    className={cn(
+                      "rounded-[5px] px-2.5 py-1 text-xs font-medium capitalize transition-colors",
+                      outputView === v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {outputView === "tree" && parsed !== null ? (
+              <JsonTree data={parsed as never} className="h-[400px]" />
+            ) : (
+              <JsonEditor
+                value={formattedJson}
+                onChange={() => {}}
+                emptyHint="Start typing valid JSON on the left — the result appears here instantly."
+                readOnly
+              />
+            )}
+          </div>
+        </div>
+
       </div>
     </div>
   )
 }
-

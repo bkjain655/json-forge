@@ -1,17 +1,29 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { JsonEditor } from "@/components/json-editor"
 import { Button } from "@/components/ui/button"
+import { ShareButton } from "@/components/ui/share-button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useSharedInput } from "@/hooks/use-shared-input"
 import { RotateCw } from "lucide-react"
+import { ToolHeader } from "@/components/tool-header"
 import { dump as yamlDump, load as yamlLoad } from "js-yaml"
 
 export default function JsonYamlClientPage() {
+  const { initialValue } = useSharedInput()
   const [json, setJson] = useState("")
   const [yaml, setYaml] = useState("")
   const [activeTab, setActiveTab] = useState("json-to-yaml")
   const [error, setError] = useState("")
+
+  // Hydrate the JSON input from a shared permalink on first client render.
+  useEffect(() => {
+    if (initialValue) {
+      setJson(initialValue)
+      setActiveTab("json-to-yaml")
+    }
+  }, [initialValue])
 
   const handleJsonToYaml = () => {
     setError("")
@@ -96,13 +108,11 @@ dimensions:
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <RotateCw className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h1 className="text-3xl font-bold mb-2">JSON ↔ YAML Converter</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Convert between JSON and YAML formats. Transform your data between these popular data serialization formats.
-        </p>
-      </div>
+      <ToolHeader
+        icon={RotateCw}
+        title="JSON ↔ YAML Converter"
+        description="Convert freely between JSON and YAML — two of the most common data serialization formats."
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="grid w-full grid-cols-2">
@@ -118,8 +128,9 @@ dimensions:
             error={activeTab === "json-to-yaml" ? error : ""}
           />
 
-          <div className="flex justify-center">
+          <div className="flex flex-wrap justify-center gap-4">
             <Button onClick={handleJsonToYaml}>Convert to YAML</Button>
+            <ShareButton value={json} />
           </div>
 
           {yaml && <JsonEditor value={yaml} onChange={() => {}} label="YAML Output" readOnly />}
@@ -136,6 +147,7 @@ dimensions:
             value={yaml}
             onChange={setYaml}
             label="YAML Input"
+            lint={false}
             error={activeTab === "yaml-to-json" ? error : ""}
           />
 
@@ -153,25 +165,6 @@ dimensions:
         </TabsContent>
       </Tabs>
 
-      <div className="mt-12 max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">About JSON and YAML</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-xl font-semibold mb-2">JSON</h3>
-            <p className="text-muted-foreground">
-              JSON (JavaScript Object Notation) is a lightweight data-interchange format that is easy for humans to read
-              and write and easy for machines to parse and generate.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2">YAML</h3>
-            <p className="text-muted-foreground">
-              YAML (YAML Ain&apos;t Markup Language) is a human-friendly data serialization standard that can be used in
-              conjunction with all programming languages and is often used for configuration files.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

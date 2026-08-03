@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { JsonEditor } from "@/components/json-editor"
 import { mergeJson, tryParseJson } from "@/lib/utils"
 import { GitMerge, Plus, Trash } from "lucide-react"
+import { ToolHeader } from "@/components/tool-header"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function JsonMergePageClient() {
@@ -109,14 +110,11 @@ export default function JsonMergePageClient() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <GitMerge className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h1 className="text-3xl font-bold mb-2">JSON Merge</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Merge multiple JSON objects into a single JSON object. Properties from later objects will override earlier
-          ones if there are conflicts.
-        </p>
-      </div>
+      <ToolHeader
+        icon={GitMerge}
+        title="JSON Merge"
+        description="Deep-merge multiple JSON objects into one. Later objects override earlier ones on conflicts."
+      />
 
       <div className="space-y-6 mb-8">
         {jsonInputs.map((json, index) => (
@@ -157,7 +155,7 @@ export default function JsonMergePageClient() {
       {result && (
         <div role="status" aria-live="polite">
           <h2 className="text-2xl font-bold text-center mb-4">Merged Result</h2>
-          <JsonEditor value={result} onChange={() => {}} readOnly height="h-[300px]" />
+          <JsonEditor value={result} onChange={() => {}} readOnly heightPx={300} />
         </div>
       )}
     </div>

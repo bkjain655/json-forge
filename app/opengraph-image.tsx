@@ -29,8 +29,8 @@ export default function OpengraphImage() {
               width: "72px",
               height: "72px",
               borderRadius: "18px",
-              background: "#f8fafc",
-              color: "#0b1120",
+              background: "#4c6ef5",
+              color: "#ffffff",
               fontSize: "38px",
               fontWeight: 700,
             }}
