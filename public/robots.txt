@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://www.jsonforge.com
+Host: https://jsonforge.com
 
 # Sitemaps
-Sitemap: https://www.jsonforge.com/sitemap.xml
+Sitemap: https://jsonforge.com/sitemap.xml
