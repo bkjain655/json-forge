@@ -1,87 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { JsonEditor } from "@/components/json-editor"
+import { JsonOutput } from "@/components/json-output"
 import { Button } from "@/components/ui/button"
+import { ShareButton } from "@/components/ui/share-button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useSharedInput } from "@/hooks/use-shared-input"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { RotateCw } from "lucide-react"
+import { ToolHeader } from "@/components/tool-header"
 import { dump as yamlDump, load as yamlLoad } from "js-yaml"
 
-export default function JsonYamlClientPage() {
-  const [json, setJson] = useState("")
-  const [yaml, setYaml] = useState("")
-  const [activeTab, setActiveTab] = useState("json-to-yaml")
-  const [error, setError] = useState("")
-
-  const handleJsonToYaml = () => {
-    setError("")
-    setYaml("")
-
-    if (!json.trim()) {
-      setError("Please enter JSON to convert")
-      return
-    }
-
-    let parsed: unknown
-    try {
-      parsed = JSON.parse(json)
-    } catch {
-      setError("Invalid JSON format")
-      return
-    }
-
-    try {
-      setYaml(yamlDump(parsed, { indent: 2, lineWidth: -1, noRefs: true }))
-    } catch (err) {
-      setError(err instanceof Error ? `Error converting JSON to YAML: ${err.message}` : "Error converting JSON to YAML")
-    }
-  }
-
-  const handleYamlToJson = () => {
-    setError("")
-    setJson("")
-
-    if (!yaml.trim()) {
-      setError("Please enter YAML to convert")
-      return
-    }
-
-    try {
-      const parsed = yamlLoad(yaml)
-      if (parsed === undefined) {
-        setError("The YAML document is empty")
-        return
-      }
-      setJson(JSON.stringify(parsed, null, 2))
-    } catch (err) {
-      setError(err instanceof Error ? `Error converting YAML to JSON: ${err.message}` : "Error converting YAML to JSON")
-    }
-  }
-
-  // Sample data for demonstration
-  const loadJsonSample = () => {
-    setJson(
-      JSON.stringify(
-        {
-          name: "Product Name",
-          price: 19.99,
-          inStock: true,
-          tags: ["electronics", "gadget"],
-          dimensions: {
-            width: 10,
-            height: 5,
-            unit: "cm",
-          },
-        },
-        null,
-        2,
-      ),
-    )
-    setActiveTab("json-to-yaml")
-  }
-
-  const loadYamlSample = () => {
-    setYaml(`name: Product Name
+const JSON_SAMPLE = JSON.stringify(
+  { name: "Product Name", price: 19.99, inStock: true, tags: ["electronics", "gadget"], dimensions: { width: 10, height: 5, unit: "cm" } },
+  null,
+  2,
+)
+const YAML_SAMPLE = `name: Product Name
 price: 19.99
 inStock: true
 tags:
@@ -90,89 +26,84 @@ tags:
 dimensions:
   width: 10
   height: 5
-  unit: cm`)
-    setActiveTab("yaml-to-json")
-  }
+  unit: cm`
+
+export default function JsonYamlClientPage() {
+  const { initialValue } = useSharedInput()
+  const [activeTab, setActiveTab] = useState("json-to-yaml")
+  const [jsonInput, setJsonInput] = useState("")
+  const [yamlInput, setYamlInput] = useState("")
+
+  useEffect(() => {
+    if (initialValue) {
+      setJsonInput(initialValue)
+      setActiveTab("json-to-yaml")
+    }
+  }, [initialValue])
+
+  const debJson = useDebouncedValue(jsonInput)
+  const jsonToYaml = useMemo(() => {
+    if (!debJson.trim()) return { output: "", error: "" }
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(debJson)
+    } catch {
+      return { output: "", error: "Invalid JSON format" }
+    }
+    try {
+      return { output: yamlDump(parsed, { indent: 2, lineWidth: -1, noRefs: true }), error: "" }
+    } catch (e) {
+      return { output: "", error: e instanceof Error ? `Error converting: ${e.message}` : "Error converting to YAML" }
+    }
+  }, [debJson])
+
+  const debYaml = useDebouncedValue(yamlInput)
+  const yamlToJson = useMemo(() => {
+    if (!debYaml.trim()) return { output: "", parsed: null as unknown, error: "" }
+    try {
+      const parsed = yamlLoad(debYaml)
+      if (parsed === undefined) return { output: "", parsed: null as unknown, error: "The YAML document is empty" }
+      return { output: JSON.stringify(parsed, null, 2), parsed: parsed as unknown, error: "" }
+    } catch (e) {
+      return { output: "", parsed: null as unknown, error: e instanceof Error ? `Error converting: ${e.message}` : "Error converting to JSON" }
+    }
+  }, [debYaml])
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <RotateCw className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h1 className="text-3xl font-bold mb-2">JSON ↔ YAML Converter</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Convert between JSON and YAML formats. Transform your data between these popular data serialization formats.
-        </p>
-      </div>
+      <ToolHeader
+        icon={RotateCw}
+        title="JSON ↔ YAML Converter"
+        description="Convert freely between JSON and YAML, live as you type. Everything runs in your browser."
+      />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="json-to-yaml">JSON to YAML</TabsTrigger>
           <TabsTrigger value="yaml-to-json">YAML to JSON</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="json-to-yaml" className="space-y-6">
-          <JsonEditor
-            value={json}
-            onChange={setJson}
-            label="JSON Input"
-            error={activeTab === "json-to-yaml" ? error : ""}
-          />
-
-          <div className="flex justify-center">
-            <Button onClick={handleJsonToYaml}>Convert to YAML</Button>
+        <TabsContent value="json-to-yaml" className="mt-4 space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setJsonInput(JSON_SAMPLE)}>Load sample</Button>
+            <ShareButton value={jsonInput} />
           </div>
-
-          {yaml && <JsonEditor value={yaml} onChange={() => {}} label="YAML Output" readOnly />}
-
-          <div className="flex justify-center">
-            <Button variant="outline" onClick={loadJsonSample}>
-              Load Sample JSON
-            </Button>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <JsonEditor value={jsonInput} onChange={setJsonInput} label="JSON input" error={jsonToYaml.error} />
+            <JsonOutput value={jsonToYaml.output} label="YAML output" fileType="yaml" emptyHint="Paste JSON on the left — YAML appears here instantly." />
           </div>
         </TabsContent>
 
-        <TabsContent value="yaml-to-json" className="space-y-6">
-          <JsonEditor
-            value={yaml}
-            onChange={setYaml}
-            label="YAML Input"
-            error={activeTab === "yaml-to-json" ? error : ""}
-          />
-
-          <div className="flex justify-center">
-            <Button onClick={handleYamlToJson}>Convert to JSON</Button>
+        <TabsContent value="yaml-to-json" className="mt-4 space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setYamlInput(YAML_SAMPLE)}>Load sample</Button>
           </div>
-
-          {json && <JsonEditor value={json} onChange={() => {}} label="JSON Output" readOnly />}
-
-          <div className="flex justify-center">
-            <Button variant="outline" onClick={loadYamlSample}>
-              Load Sample YAML
-            </Button>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <JsonEditor value={yamlInput} onChange={setYamlInput} label="YAML input" error={yamlToJson.error} lint={false} fileType="yaml" placeholder="Paste your YAML here..." />
+            <JsonOutput value={yamlToJson.output} parsed={yamlToJson.parsed} label="JSON output" emptyHint="Paste YAML on the left — JSON appears here instantly." />
           </div>
         </TabsContent>
       </Tabs>
-
-      <div className="mt-12 max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">About JSON and YAML</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-xl font-semibold mb-2">JSON</h3>
-            <p className="text-muted-foreground">
-              JSON (JavaScript Object Notation) is a lightweight data-interchange format that is easy for humans to read
-              and write and easy for machines to parse and generate.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2">YAML</h3>
-            <p className="text-muted-foreground">
-              YAML (YAML Ain&apos;t Markup Language) is a human-friendly data serialization standard that can be used in
-              conjunction with all programming languages and is often used for configuration files.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
-
