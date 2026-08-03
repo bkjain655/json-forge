@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "sitemap": "next-sitemap",
     "postbuild": "next-sitemap generate"
   },
@@ -73,6 +76,7 @@
     "eslint-config-next": "15.5.21",
     "postcss": "^8.5.10",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }
