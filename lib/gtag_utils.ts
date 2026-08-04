@@ -1,4 +1,9 @@
-export const GA_TRACKING_ID = process.env.NODE_ENV === "production" ? "G-YF0MZF0GGG" : "G-J3MNQZE15J";
+// GA4 measurement ID for this site's own property (jsonforge.com). Set
+// NEXT_PUBLIC_GA_MEASUREMENT_ID in the deployment env to override; otherwise it
+// falls back to this site's ID in production, and is disabled in development.
+export const GA_TRACKING_ID =
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
+  (process.env.NODE_ENV === "production" ? "G-YF0MZF0GGG" : "");
 
 // The gtag `config` call in the root layout runs with `send_page_view: false`,
 // so every pageview - including the first one - is sent from here exactly once.
