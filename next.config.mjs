@@ -15,6 +15,14 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  // Permanent redirects for old URLs that changed, so external links and
+  // Google's index resolve to the current page instead of 404ing.
+  // /about-us was renamed to /about in the July 2026 SEO pass.
+  async redirects() {
+    return [
+      { source: "/about-us", destination: "/about", permanent: true },
+    ]
+  },
 }
 
 export default nextConfig
