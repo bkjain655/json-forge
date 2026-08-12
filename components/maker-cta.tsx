@@ -1,11 +1,10 @@
 import { ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { AUTHOR_NAME, AUTHOR_URL, AUTHOR_TAGLINE } from "@/lib/constants"
+import { AUTHOR_NAME, AUTHOR_URL } from "@/lib/constants"
 
 /**
- * Conversion band. JSON Forge's visitors are developers and technical buyers —
- * exactly the audience for Bhavesh's front-end engagements — so give them one
- * clear, low-pressure path to the portfolio.
+ * Maker credit. A neutral, low-pressure link to more of Bhavesh's work —
+ * no sales pitch, so the site reads well to any visitor.
  */
 export function MakerCta() {
   return (
@@ -15,16 +14,16 @@ export function MakerCta() {
           <div>
             <p className="text-sm font-medium text-primary">Made by {AUTHOR_NAME}</p>
             <h2 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
-              Building a SaaS product? {AUTHOR_TAGLINE}.
+              More tools & projects
             </h2>
             <p className="mt-2 max-w-xl text-muted-foreground">
-              This tool is a small taste of the craft. If you need a fast, polished front-end for your
-              enterprise SaaS, let&apos;s talk.
+              JSON Forge is one of several web tools and products I build and maintain. Explore the
+              rest of my work.
             </p>
           </div>
           <Button asChild size="lg" className="shrink-0">
             <a href={AUTHOR_URL} target="_blank" rel="noopener noreferrer">
-              Work with me <ArrowUpRight className="ml-2 h-4 w-4" />
+              See more of my work <ArrowUpRight className="ml-2 h-4 w-4" />
             </a>
           </Button>
         </div>
